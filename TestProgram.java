@@ -21,33 +21,59 @@ import java.io.BufferedReader;
         return key + " " + value;
     }
  }
+ class Node{
+    private MyEntry e;
+    Node above, below, prev, next;
+    public Node(MyEntry e){
+        this.e = e;
+    }
+    public int getKey(){
+        return e.getKey();
+    }
+    public String getValue(){
+        return e.getValue();
+    }
+    public void H_delete(){
+        Node prev = this.prev;
+        Node next = this.next;
+        prev.next = next;
+        next.prev = prev;
+    } 
+    public String toString(){
+        return e.toString();
+    }
+ }
  //Class SkipListPQ
  class SkipListPQ {
     private double alpha;
     private Random rand;
-     //AGGIUNTE MIE
-     private List<List<MyEntry>> sl;
-     //private static List<MyEntry> empty_list;
-     //FINE AGGIUNTE MIE
+    private Node s; // nodo di partenza (in alto a sx)
+    private int height;
+    private int n_entries; 
     public SkipListPQ(double alpha) {
         this.alpha = alpha;
         this.rand = new Random();
-        this.sl = new ArrayList<>();//col fatto ch è un array che implementa una lista potrebbe dare problemi nell'insert
-        List<MyEntry> empty_list = new ArrayList<MyEntry>();
-        empty_list.add(new MyEntry(Integer.MIN_VALUE,"-inf"));
-        empty_list.add(new MyEntry(Integer.MAX_VALUE,"+inf"));
-        sl.add(empty_list);
- // TO BE COMPLETED       
+        this.height = 0;
+        this.n_entries = 0;
+        this.s = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
+        Node inf = new Node(new MyEntry(Integer.MIN_VALUE, "+inf"));
+        s.next = inf;
+        inf.prev = s;
+        
+         // TO BE COMPLETED       
     }
     public int size() {
-        return sl.get(0).size() - 2;
- // TO BE COMPLETED (finito?)       
+        return n_entries;       
     }
+
     public MyEntry min() {
-        if(this.size()!=0)return sl.get(0).get(1);
-        return null;
- // TO BE COMPLETED (finito?) 
+        if(n_entries == 0) return null;
+        Node temp_node = s;
+        while(temp_node.below != null) temp_node = temp_node.below;
+        temp_node = temp_node.next;
+        return new MyEntry(temp_node.getKey(),temp_node.getValue());
     }
+
     public int insert(int key, String value) {
  // TO BE COMPLETED 
     }
@@ -67,39 +93,37 @@ import java.io.BufferedReader;
         return level;
     }
     public MyEntry removeMin() {
-        MyEntry e = min();
-        if(e==null) return e;
-        int i = 0;
-        boolean check = sl.get(i).remove(e);
-        while(check)
-        {
-            i++;
-            check = sl.get(i).remove(e);  
+        if(n_entries == 0) return null;
+        Node temp_node = s;
+        while(temp_node.below != null)temp_node = temp_node.below; 
+        temp_node = temp_node.next;
+        MyEntry e = new MyEntry(temp_node.getKey(),temp_node.getValue());
+        while(temp_node.above != null)temp_node = temp_node.above;
+        while(temp_node.below != null){
+            temp_node.H_delete();
+            temp_node = temp_node.below;
         } 
-        //parte di pulizia
-        while (sl.size() > 1 && sl.get(sl.size() - 2).size() == 2) sl.remove(sl.size() - 1);
-        //fine pulizia
+        temp_node.H_delete();
         return e;
- // TO BE COMPLETED (finito?) 
+ // TO BE COMPLETED 
     }
     public void print() {
-        int i = 1;
-        String s = "";
-        while(i < sl.get(0).size()-1)
-        {   
-            MyEntry e = sl.get(0).get(i);
-            int j = 1;
-            while((j < sl.size()) && sl.get(j).contains(e))
-            {
-                j++;
+        Node temp_node = s;
+        String out = "";
+        while(temp_node.below != null) temp_node = temp_node.below;
+        for(int i = 0; i < n_entries; i++){
+            temp_node = temp_node.next;
+            int temp_height = 0;
+            Node height_node = temp_node;
+            while(height_node.above != null){
+                height_node = height_node.above;
+                temp_height++;
             } 
-            s+=(e + " "+ j + ", ");
-            i++;
+            out+=temp_node + " " + temp_height +", ";
         }
-        s = s.substring(0,s.length()-2);
-        //System.out.println(sl.get(0).size()-2); -> trovato è un problema di inserimento, guarda in insert
-        System.out.println(s);
- // TO BE COMPLETED (finito?) 
+        out = out.substring(0,out.length()-2);
+        System.out.println(out);
+ // TO BE COMPLETED 
     }
  }
  //TestProgram
@@ -120,22 +144,15 @@ import java.io.BufferedReader;
                 int operation = Integer.parseInt(line[0]);
                 switch (operation) {
                     case 0:
-                    MyEntry min_entry = skipList.min();
-                        if(min_entry != null) System.out.println(min_entry);
- // TO BE COMPLETED (finito?)
+ // TO BE COMPLETED 
                         break;
                     case 1:
-                    skipList.removeMin();
- // TO BE COMPLETED (finito?)
+ // TO BE COMPLETED 
                         break;
                     case 2:
-                    int key = Integer.parseInt(line[1]);
-                    String value = line[2];
-                    skipList.insert(key, value);
-// TO BE COMPLETED (finito?)
+ // TO BE COMPLETED 
                         break;
                     case 3:
-                    skipList.print();
  // TO BE COMPLETED 
                         break;
                     default:
