@@ -56,7 +56,7 @@ import java.io.BufferedReader;
         this.height = 0;
         this.n_entries = 0;
         this.s = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
-        Node inf = new Node(new MyEntry(Integer.MIN_VALUE, "+inf"));
+        Node inf = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
         s.next = inf;
         inf.prev = s;
         
@@ -75,6 +75,48 @@ import java.io.BufferedReader;
     }
 
     public int insert(int key, String value) {
+        int traversed_nodes = 0;
+        Node to_be_inserted = new Node(new MyEntry(key,value));
+        Node temp_node = s;
+        int level = generateEll(alpha, key);
+        if(height==0){
+                Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
+                s.below = below;
+                below.above = s;
+                Node inf = s.next;
+                below = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
+                inf.below = below;
+                below.above = inf;
+                below.prev = s.below;
+                s.below.next = below;
+            }
+        while(height <= level){//se l'altezza del nodo da inserire supera quella della skiplist aggiungo livelli con le sentinelle
+                Node below = s.below;
+                Node new_node = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
+                below.above = new_node;
+                s.below = new_node;
+                Node inf = s.next;
+                below = inf.below;
+                new_node = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
+                below.above = new_node;
+                inf.below = new_node;
+                new_node.prev = s.below;
+                s.below.next = new_node;
+        }
+        while(temp_node.below != null){
+            temp_node = temp_node.below();
+            traversed_nodes++; // conto il nodo da cui scendo
+            while(key >= temp_node.next().getKey()){
+                temp_node = temp_node.next();
+                traversed_nodes++; // conto il nodo  da cui mi sposto a dx
+            }
+        }
+        traversed_nodes++; //per contare il nodo in cui si ferma
+        Node next = temp_node.next;
+        temp_node.next = to_be_inserted;
+        next.prev = to_be_inserted;
+        //ho inserito nel livello base la mia nuova entry
+
  // TO BE COMPLETED 
     }
     private int generateEll(double alpha_ , int key) {
