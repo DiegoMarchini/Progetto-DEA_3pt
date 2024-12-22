@@ -106,10 +106,10 @@ import java.io.BufferedReader;
         }
         while(temp_node.below != null){
             current_height--;
-            temp_node = temp_node.below();
+            temp_node = temp_node.below;
             traversed_nodes++; // conto il nodo da cui scendo
-            while(key >= temp_node.next().getKey()){
-                temp_node = temp_node.next();
+            while(key >= temp_node.next.getKey()){
+                temp_node = temp_node.next;
                 traversed_nodes++; // conto il nodo  da cui mi sposto a dx
             }
             //inserimento
@@ -122,7 +122,7 @@ import java.io.BufferedReader;
                 }
                 Node next = temp_node.next;
                 temp_node.next = to_be_inserted;
-                next.prev = to_be_inserted   
+                next.prev = to_be_inserted;   
             }
         }
         traversed_nodes++; //per contare il nodo in cui si ferma
