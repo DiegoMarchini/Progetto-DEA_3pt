@@ -103,6 +103,7 @@ import java.io.BufferedReader;
                 inf.below = new_node;
                 new_node.prev = s.below;
                 s.below.next = new_node;
+                height++;
         }
         while(temp_node.below != null){
             current_height--;
