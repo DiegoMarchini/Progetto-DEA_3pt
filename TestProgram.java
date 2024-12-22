@@ -76,9 +76,10 @@ import java.io.BufferedReader;
 
     public int insert(int key, String value) {
         int traversed_nodes = 0;
-        Node to_be_inserted = new Node(new MyEntry(key,value));
         Node temp_node = s;
         int level = generateEll(alpha, key);
+        int current_height = height;
+        Node to_be_inserted = new Node(new MyEntry(key,value));
         if(height==0){
                 Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
                 s.below = below;
@@ -104,19 +105,29 @@ import java.io.BufferedReader;
                 s.below.next = new_node;
         }
         while(temp_node.below != null){
+            current_height--;
             temp_node = temp_node.below();
             traversed_nodes++; // conto il nodo da cui scendo
             while(key >= temp_node.next().getKey()){
                 temp_node = temp_node.next();
                 traversed_nodes++; // conto il nodo  da cui mi sposto a dx
             }
+            //inserimento
+            if(current_height<= level){
+                if(current_height < level){
+                    Node new_node = new Node(new MyEntry(key,value));
+                    to_be_inserted.below = new_node;
+                    new_node.above = to_be_inserted;
+                    to_be_inserted = new_node;
+                }
+                Node next = temp_node.next;
+                temp_node.next = to_be_inserted;
+                next.prev = to_be_inserted   
+            }
         }
         traversed_nodes++; //per contare il nodo in cui si ferma
-        Node next = temp_node.next;
-        temp_node.next = to_be_inserted;
-        next.prev = to_be_inserted;
-        //ho inserito nel livello base la mia nuova entry
-
+        n_entries++;
+        return traversed_nodes;
  // TO BE COMPLETED 
     }
     private int generateEll(double alpha_ , int key) {
@@ -181,20 +192,32 @@ import java.io.BufferedReader;
             double alpha = Double.parseDouble(firstLine[1]);
             System.out.println(N + " " + alpha);
             SkipListPQ skipList = new SkipListPQ(alpha);
+            //aggiunta mia 
+            int total_traversed_nodes = 0;
+            int n_inserts = 0;
+            //fine aggiunta mia
             for (int i = 0; i < N; i++) {
                 String[] line = br.readLine().split(" ");
                 int operation = Integer.parseInt(line[0]);
                 switch (operation) {
                     case 0:
+                        MyEntry min_entry = skipList.min();
+                        if(min_entry != null) System.out.println(min_entry);
  // TO BE COMPLETED 
                         break;
                     case 1:
+                        skipList.removeMin();
  // TO BE COMPLETED 
                         break;
                     case 2:
+                        int key = Integer.parseInt(line[1]);
+                        String value = line[2];
+                        total_traversed_nodes += skipList.insert(key, value);
+                        n_inserts++;
  // TO BE COMPLETED 
                         break;
                     case 3:
+                        skipList.print();
  // TO BE COMPLETED 
                         break;
                     default:
@@ -202,6 +225,10 @@ import java.io.BufferedReader;
                         return;
                 }
             }
+            //aggiunta mia
+            double average_nodes = (double)(total_traversed_nodes/n_inserts);
+            System.out.println(alpha + " " + skipList.size() + " " + n_inserts + " " + average_nodes);
+            //fine aggiunta mia
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
