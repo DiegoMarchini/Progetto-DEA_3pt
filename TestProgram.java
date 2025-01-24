@@ -80,52 +80,72 @@ import java.io.BufferedReader;
         int traversed_nodes = 0;
         Node temp_node = s;
         int level = generateEll(alpha, key);
-        int current_height = height;
+        int current_height;
         Node to_be_inserted = new Node(new MyEntry(key,value));
-        if(height==0){
+        
+        if(height==0){//se o solo una skiplist di base con le 2 sentinelle -> creo un livello sotto per fare da base
+                //aggiungo e creo collegamenti verticali a -inf
                 Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
                 s.below = below;
                 below.above = s;
+                //aggiungo e creo collegamenti verticali a +inf
                 Node inf = s.next;
                 below = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
                 inf.below = below;
                 below.above = inf;
+                //creo collegamenti orizzontali
                 below.prev = s.below;
                 s.below.next = below;
+                height++;
             }
+        
         while(height <= level){//se l'altezza del nodo da inserire supera quella della skiplist aggiungo livelli con le sentinelle
-                Node below = s.below;
+                //aggiungo e creo collegamenti verticali a -inf
+                Node below;
+                below = s.below;
                 Node new_node = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
                 below.above = new_node;
+                new_node.below = below;
                 s.below = new_node;
+                new_node.above = s;
+                //aggiungo e creo collegamenti verticali a +inf
                 Node inf = s.next;
                 below = inf.below;
                 new_node = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
                 below.above = new_node;
+                new_node.below = below;
                 inf.below = new_node;
+                new_node.above = inf;
+                //creo collegamenti orizzontali
                 new_node.prev = s.below;
                 s.below.next = new_node;
                 height++;
         }
+        current_height = height;
+        //temp_node parte da s (in alto a sx)
         while(temp_node.below != null){
             current_height--;
             temp_node = temp_node.below;
             traversed_nodes++; // conto il nodo da cui scendo
-            while(key >= temp_node.next.getKey()){
+            while(key >= temp_node.next.getKey()){//probabilmente quando hai fatto un collegamento orizz hai scazzato, controlla
                 temp_node = temp_node.next;
                 traversed_nodes++; // conto il nodo  da cui mi sposto a dx
             }
             //inserimento
             if(current_height<= level){
                 if(current_height < level){
+                    //creo un collegamnto verticali se ho già inserito ad un livello più alto 
                     Node new_node = new Node(new MyEntry(key,value));
                     to_be_inserted.below = new_node;
                     new_node.above = to_be_inserted;
                     to_be_inserted = new_node;
                 }
+                //inserisco il nodo al livello in cui mi trovo (collegamenti orizzontali)
                 Node next = temp_node.next;
                 temp_node.next = to_be_inserted;
+                to_be_inserted.prev = temp_node;
                 next.prev = to_be_inserted;   
+                to_be_inserted.next = next;
             }
         }
         traversed_nodes++; //per contare il nodo in cui si ferma
