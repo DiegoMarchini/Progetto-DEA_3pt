@@ -34,10 +34,10 @@ import java.io.BufferedReader;
         return e.getValue();
     }
     public void H_delete(){
-        Node prev = this.prev;
-        Node next = this.next;
-        prev.next = next;
-        next.prev = prev;
+        Node prev_ = this.prev;
+        Node next_ = this.next;
+        prev_.next = next_;
+        next_.prev = prev_;
     } 
     public String toString(){
         return e.toString();
@@ -59,13 +59,15 @@ import java.io.BufferedReader;
         Node inf = new Node(new MyEntry(Integer.MAX_VALUE, "+inf"));
         s.next = inf;
         inf.prev = s;
-        
-         // TO BE COMPLETED       
+               
     }
+
+    //ritorno il numero di entry inserite (nel piano base)
     public int size() {
         return n_entries;       
     }
 
+    //se c'è almeno una entry, finché si può scendere scendo, poi prendo il primo nodo dopo la sentinella -inf -> ritorno la entry di quel nodo
     public MyEntry min() {
         if(n_entries == 0) return null;
         Node temp_node = s;
@@ -129,8 +131,10 @@ import java.io.BufferedReader;
         traversed_nodes++; //per contare il nodo in cui si ferma
         n_entries++;
         return traversed_nodes;
- // TO BE COMPLETED 
+  
     }
+
+    //fornito nel template
     private int generateEll(double alpha_ , int key) {
         int level = 0;
         if (alpha_ >= 0. && alpha_< 1) {
@@ -146,20 +150,31 @@ import java.io.BufferedReader;
         }
         return level;
     }
+
+    // se c'è almeno una entry, finché si può scendere scendo, poi prendo il primo nodo dopo la sentinella -inf, salvo la entry del nodo(da ritornare),
+    // e salgo recidendo i legami orizzontali -> verticalmente rimane una struttura separata dalla lista bidimensionale di nodi e senza riferimento
+    // -> eliminata dal GARBAGE COLLECTOR , poi guardo se l'altezza della struttura deve diminuire
     public MyEntry removeMin() {
         if(n_entries == 0) return null;
         Node temp_node = s;
         while(temp_node.below != null)temp_node = temp_node.below; 
         temp_node = temp_node.next;
         MyEntry e = new MyEntry(temp_node.getKey(),temp_node.getValue());
-        while(temp_node.above != null)temp_node = temp_node.above;
-        while(temp_node.below != null){
-            temp_node.H_delete();
-            temp_node = temp_node.below;
-        } 
         temp_node.H_delete();
+        while(temp_node.above != null){
+            temp_node = temp_node.above;
+            temp_node.H_delete();
+        }
+        n_entries--;
+        temp_node = s.below;
+        while(temp_node != null && (temp_node.next.getValue() == "+inf")){
+            s = temp_node;
+            s.above = null;
+            s.next.above = null;
+            height--;
+            temp_node = s.below;
+        }
         return e;
- // TO BE COMPLETED 
     }
     public void print() {
         Node temp_node = s;
