@@ -38,6 +38,8 @@ import java.io.BufferedReader;
         Node next_ = this.next;
         prev_.next = next_;
         next_.prev = prev_;
+        this.prev = null;
+        this.next = null;
     } 
     public String toString(){
         return e.toString();
@@ -79,8 +81,8 @@ import java.io.BufferedReader;
     public int insert(int key, String value) {
         int traversed_nodes = 0;
         int level = generateEll(alpha, key);
-        //System.out.println("elemento "+ value + " alto " + level);
-        if(height==0){//se o solo una skiplist di base con le 2 sentinelle -> creo un livello sotto per fare da base
+        
+        if(height==0){//se ho solo una skiplist di base con le 2 sentinelle -> creo un livello sotto per fare da base
                 //aggiungo e creo collegamenti verticali a -inf
                 Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
                 s.below = below;
@@ -95,7 +97,25 @@ import java.io.BufferedReader;
                 s.below.next = below;
                 height++;
             }
-        
+        //nuova implementazione
+        Node to_be_inserted = new Node(new MyEntry(key,value));
+        Node temp_node = s;
+        while(temp_node.below != null){
+            temp_node = temp_node.below;
+            traversed_nodes++;
+            while(key >= temp_node.next.getKey()){
+                temp_node = temp_node.next;
+                traversed_nodes++;
+            }
+        }
+        traversed_nodes++;
+        //inserimento alla base
+        Node next = temp_node.next;
+        next.prev = to_be_inserted;
+        to_be_inserted.next = next;
+        temp_node.next = to_be_inserted;
+        to_be_inserted.prev = temp_node;
+        //fine nuova implementazione
         while(height <= level){//se l'altezza del nodo da inserire supera quella della skiplist aggiungo livelli con le sentinelle
                 //aggiungo e creo collegamenti verticali a -inf
                 Node below;
@@ -118,38 +138,27 @@ import java.io.BufferedReader;
                 s.below.next = new_node;
                 height++;
         }
-
-        int current_height = height;
-        Node temp_node = s;
-        Node to_be_inserted = new Node(new MyEntry(key,value));
-        //temp_node parte da s (in alto a sx)
-        while(temp_node.below != null){
-            current_height--;
-            temp_node = temp_node.below;
-            traversed_nodes++; // conto il nodo da cui scendo
-            while(key >= temp_node.next.getKey()){//probabilmente quando hai fatto un collegamento orizz hai scazzato, controlla
-                temp_node = temp_node.next;
-                traversed_nodes++; // conto il nodo  da cui mi sposto a dx
-            }
-            //inserimento
-            if(current_height<= level){
-                if(current_height < level){
-                    //creo un collegamnto verticali se ho già inserito ad un livello più alto 
-                    Node new_node = new Node(new MyEntry(key,value));
-                    to_be_inserted.below = new_node;
-                    new_node.above = to_be_inserted;
-                    to_be_inserted = new_node;
-                }
-                //inserisco il nodo al livello in cui mi trovo (collegamenti orizzontali)
-                Node next = temp_node.next;
-                temp_node.next = to_be_inserted;
-                to_be_inserted.prev = temp_node;
-                next.prev = to_be_inserted;   
-                to_be_inserted.next = next;
-            }
+        int current_height = 0;
+        Node new_insert;
+        while(current_height < level){
+            new_insert = new Node(new MyEntry(key,value));
+            //link verticale
+            to_be_inserted.above = new_insert;
+            new_insert.below = to_be_inserted;
+            //link orizzontale
+            //System.out.print(current_height+ " ");
+            while(temp_node.above == null) temp_node = temp_node.prev;
+            temp_node = temp_node.above;
+            next = temp_node.next;
+            temp_node.next = new_insert;
+            new_insert.prev = temp_node;
+            next.prev = new_insert;
+            new_insert.next = next;
+            to_be_inserted = new_insert;
+            current_height++;
         }
-        traversed_nodes++; //per contare il nodo in cui si ferma
         n_entries++;
+        //System.out.println("entry "+key+ " "+ value+ ", inserita");
         return traversed_nodes;
   
     }
@@ -212,7 +221,7 @@ import java.io.BufferedReader;
         }
         out = out.substring(0,out.length()-2);
         System.out.println(out);
- // TO BE COMPLETED 
+  
     }
  }
  //TestProgram
@@ -229,7 +238,7 @@ import java.io.BufferedReader;
             System.out.println(N + " " + alpha);
             SkipListPQ skipList = new SkipListPQ(alpha);
             //aggiunta mia 
-            double total_traversed_nodes = 0;
+            int total_traversed_nodes = 0;
             int n_inserts = 0;
             //fine aggiunta mia
             for (int i = 0; i < N; i++) {
@@ -239,22 +248,22 @@ import java.io.BufferedReader;
                     case 0:
                         MyEntry min_entry = skipList.min();
                         if(min_entry != null) System.out.println(min_entry);
- // TO BE COMPLETED 
+  
                         break;
                     case 1:
                         skipList.removeMin();
- // TO BE COMPLETED 
+  
                         break;
                     case 2:
                         int key = Integer.parseInt(line[1]);
                         String value = line[2];
                         total_traversed_nodes += skipList.insert(key, value);
                         n_inserts++;
- // TO BE COMPLETED 
+  
                         break;
                     case 3:
                         skipList.print();
- // TO BE COMPLETED 
+ 
                         break;
                     default:
                         System.out.println("Invalid operation code");
@@ -262,7 +271,8 @@ import java.io.BufferedReader;
                 }
             }
             //aggiunta mia
-            double average_nodes = (double)(total_traversed_nodes/n_inserts);
+            double average_nodes = ((double)total_traversed_nodes/n_inserts);
+            //System.out.println("totale nodi attraversati: "+ total_traversed_nodes);
             System.out.println(alpha + " " + skipList.size() + " " + n_inserts + " " + average_nodes);
             //fine aggiunta mia
         } catch (IOException e) {
@@ -270,3 +280,35 @@ import java.io.BufferedReader;
         }
     }
  }
+ /*
+ int current_height = height;
+        Node temp_node = s;
+        Node to_be_inserted = new Node(new MyEntry(key,value));
+        //temp_node parte da s (in alto a sx)
+        while(temp_node.below != null){
+            current_height--;
+            temp_node = temp_node.below;
+            traversed_nodes++; // conto il nodo da cui scendo
+            while(key >= temp_node.next.getKey()){//probabilmente quando hai fatto un collegamento orizz hai scazzato, controlla
+                temp_node = temp_node.next;
+                traversed_nodes++; // conto il nodo  da cui mi sposto a dx
+            }
+            //inserimento
+            if(current_height<= level){
+                if(current_height < level){
+                    //creo un collegamnto verticali se ho già inserito ad un livello più alto 
+                    Node new_node = new Node(new MyEntry(key,value));
+                    to_be_inserted.below = new_node;
+                    new_node.above = to_be_inserted;
+                    to_be_inserted = new_node;
+                }
+                //inserisco il nodo al livello in cui mi trovo (collegamenti orizzontali)
+                Node next = temp_node.next;
+                temp_node.next = to_be_inserted;
+                to_be_inserted.prev = temp_node;
+                next.prev = to_be_inserted;   
+                to_be_inserted.next = next;
+            }
+        }
+        traversed_nodes++; //per contare il nodo in cui si ferma
+ */ 
