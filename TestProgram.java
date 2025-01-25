@@ -6,13 +6,19 @@ import java.io.BufferedReader;
  class MyEntry {
     private Integer key;
     private String value;
+
+    //costruttore
     public MyEntry(Integer key, String value) {
         this.key = key;
         this.value = value;
     }
+
+    //ritorna la chiave della entry 
     public Integer getKey() {
         return key;
     }
+
+    //ritorna il valore della entry
     public String getValue() {
         return value;
     }
@@ -21,18 +27,29 @@ import java.io.BufferedReader;
         return key + " " + value;
     }
  }
+
+ //Class Node
  class Node{
-    private MyEntry e;
-    Node above, below, prev, next;
+
+    private MyEntry e; // entry contenuta nel nodo this
+    Node above, below, prev, next; // nodi adiacenti al nodo this, di default null
+
+    //costruttore
     public Node(MyEntry e){
         this.e = e;
     }
+
+    //ritorna la chiave della entry contenuta dal nodo
     public int getKey(){
         return e.getKey();
     }
+
+    //ritorna il valore della entry contenuta dal nodo
     public String getValue(){
         return e.getValue();
     }
+
+    // funzione che recide i collegamenti con i nodi precedente e successivo
     public void H_delete(){
         Node prev_ = this.prev;
         Node next_ = this.next;
@@ -41,6 +58,16 @@ import java.io.BufferedReader;
         this.prev = null;
         this.next = null;
     } 
+
+    //funzione che crea i collegamenti con i nodi precedente e successivo
+    public void H_link(Node prev_){
+        Node next_ = prev_.next;
+        prev_.next = this;
+        this.prev = prev_;
+        next_.prev = this;
+        this.next = next_;
+    }
+
     public String toString(){
         return e.toString();
     }
@@ -50,8 +77,10 @@ import java.io.BufferedReader;
     private double alpha;
     private Random rand;
     private Node s; // nodo di partenza (in alto a sx)
-    private int height;
-    private int n_entries; 
+    private int height; // altezza della struttura (la lista base S_0 è ad altezza 0, la lista con solo le sentinelle è al livello più alto S_height)
+    private int n_entries; // numero di entries al livello S_0
+
+    //costruttore
     public SkipListPQ(double alpha) {
         this.alpha = alpha;
         this.rand = new Random();
@@ -64,12 +93,13 @@ import java.io.BufferedReader;
                
     }
 
-    //ritorno il numero di entry inserite (nel piano base)
+    //ritorno il numero di entries inserite (nel piano base)
     public int size() {
         return n_entries;       
     }
 
-    //se c'è almeno una entry, finché si può scendere scendo, poi prendo il primo nodo dopo la sentinella -inf -> ritorno la entry di quel nodo
+    //ritorna la entry di chiave minima. 
+    //se c'è almeno una entry, scende fino alla lista base S_0, poi considera il primo nodo dopo la sentinella -inf -> ritorna la entry di quel nodo
     public MyEntry min() {
         if(n_entries == 0) return null;
         Node temp_node = s;
@@ -78,11 +108,13 @@ import java.io.BufferedReader;
         return new MyEntry(temp_node.getKey(),temp_node.getValue());
     }
 
+    //inserisce la entry di chiave: key e valore: value. Ritorna il numero di nodi attraversati per effettuare l'inserimento
     public int insert(int key, String value) {
         int traversed_nodes = 0;
         int level = generateEll(alpha, key);
         
-        if(height==0){//se ho solo una skiplist di base con le 2 sentinelle -> creo un livello sotto per fare da base
+        if(height==0){//se è presente solo la lista con le 2 sentinelle -> creo un livello sotto per fare da base
+
                 //aggiungo e creo collegamenti verticali a -inf
                 Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
                 s.below = below;
@@ -97,7 +129,7 @@ import java.io.BufferedReader;
                 s.below.next = below;
                 height++;
             }
-        //nuova implementazione
+        //SkipSearch(key,value)
         Node to_be_inserted = new Node(new MyEntry(key,value));
         Node temp_node = s;
         while(temp_node.below != null){
@@ -109,14 +141,12 @@ import java.io.BufferedReader;
             }
         }
         traversed_nodes++;
-        //inserimento alla base
-        Node next = temp_node.next;
-        next.prev = to_be_inserted;
-        to_be_inserted.next = next;
-        temp_node.next = to_be_inserted;
-        to_be_inserted.prev = temp_node;
-        //fine nuova implementazione
-        while(height <= level){//se l'altezza del nodo da inserire supera quella della skiplist aggiungo livelli con le sentinelle
+        //fine di SkipSearch
+
+        to_be_inserted.H_link(temp_node);//inserimento alla base
+        
+        while(height <= level){//se l'altezza del nodo da inserire supera quella della skiplist aggiungo livelli "vuoti" con le 2 sentinelle
+
                 //aggiungo e creo collegamenti verticali a -inf
                 Node below;
                 below = s.below;
@@ -138,6 +168,7 @@ import java.io.BufferedReader;
                 s.below.next = new_node;
                 height++;
         }
+        //inseritmenti nei livelli superiori alla base S_0
         int current_height = 0;
         Node new_insert;
         while(current_height < level){
@@ -148,15 +179,13 @@ import java.io.BufferedReader;
             //link orizzontale
             while(temp_node.above == null) temp_node = temp_node.prev;
             temp_node = temp_node.above;
-            next = temp_node.next;
-            temp_node.next = new_insert;
-            new_insert.prev = temp_node;
-            next.prev = new_insert;
-            new_insert.next = next;
+            new_insert.H_link(temp_node);
             to_be_inserted = new_insert;
             current_height++;
         }
-        n_entries++;
+       
+        n_entries++; //aggiorno il numero di entries
+
         return traversed_nodes;
   
     }
@@ -178,9 +207,10 @@ import java.io.BufferedReader;
         return level;
     }
 
-    // se c'è almeno una entry, finché si può scendere scendo, poi prendo il primo nodo dopo la sentinella -inf, salvo la entry del nodo(da ritornare),
-    // e salgo recidendo i legami orizzontali -> verticalmente rimane una struttura separata dalla lista bidimensionale di nodi e senza riferimento
-    // -> eliminata dal GARBAGE COLLECTOR , poi guardo se l'altezza della struttura deve diminuire
+    //funzione che rimuove la entry di chiave minima
+    //se c'è almeno una entry, scende fino alla lista base S_0, poi considera il primo nodo dopo la sentinella -inf -> salva la entry di quel nodo (da ritornare)
+    // e risale recidendo i legami orizzontali -> verticalmente rimane una struttura separata dalla lista bidimensionale di nodi e senza riferimento
+    // -> eliminata dal GARBAGE COLLECTOR , poi verifica se l'altezza della struttura deve diminuire
     public MyEntry removeMin() {
         if(n_entries == 0) return null;
         Node temp_node = s;
@@ -203,6 +233,8 @@ import java.io.BufferedReader;
         }
         return e;
     }
+
+    //funzione che stampa le entries presenti nella struttura ognuna associata alla propria "altezza"
     public void print() {
         Node temp_node = s;
         String out = "";
@@ -268,10 +300,10 @@ import java.io.BufferedReader;
                         return;
                 }
             }
-            //aggiunta mia
+            
             double average_nodes = ((double)total_traversed_nodes/n_inserts);
             System.out.println(alpha + " " + skipList.size() + " " + n_inserts + " " + average_nodes);
-            //fine aggiunta mia
+            
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
