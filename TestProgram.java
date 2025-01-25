@@ -78,11 +78,8 @@ import java.io.BufferedReader;
 
     public int insert(int key, String value) {
         int traversed_nodes = 0;
-        Node temp_node = s;
         int level = generateEll(alpha, key);
-        int current_height;
-        Node to_be_inserted = new Node(new MyEntry(key,value));
-        
+        //System.out.println("elemento "+ value + " alto " + level);
         if(height==0){//se o solo una skiplist di base con le 2 sentinelle -> creo un livello sotto per fare da base
                 //aggiungo e creo collegamenti verticali a -inf
                 Node below = new Node(new MyEntry(Integer.MIN_VALUE, "-inf"));
@@ -121,7 +118,10 @@ import java.io.BufferedReader;
                 s.below.next = new_node;
                 height++;
         }
-        current_height = height;
+
+        int current_height = height;
+        Node temp_node = s;
+        Node to_be_inserted = new Node(new MyEntry(key,value));
         //temp_node parte da s (in alto a sx)
         while(temp_node.below != null){
             current_height--;
@@ -202,7 +202,7 @@ import java.io.BufferedReader;
         while(temp_node.below != null) temp_node = temp_node.below;
         for(int i = 0; i < n_entries; i++){
             temp_node = temp_node.next;
-            int temp_height = 0;
+            int temp_height = 1;
             Node height_node = temp_node;
             while(height_node.above != null){
                 height_node = height_node.above;
@@ -229,7 +229,7 @@ import java.io.BufferedReader;
             System.out.println(N + " " + alpha);
             SkipListPQ skipList = new SkipListPQ(alpha);
             //aggiunta mia 
-            int total_traversed_nodes = 0;
+            double total_traversed_nodes = 0;
             int n_inserts = 0;
             //fine aggiunta mia
             for (int i = 0; i < N; i++) {
