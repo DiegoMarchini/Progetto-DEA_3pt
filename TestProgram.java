@@ -146,7 +146,6 @@ import java.io.BufferedReader;
             to_be_inserted.above = new_insert;
             new_insert.below = to_be_inserted;
             //link orizzontale
-            //System.out.print(current_height+ " ");
             while(temp_node.above == null) temp_node = temp_node.prev;
             temp_node = temp_node.above;
             next = temp_node.next;
@@ -158,7 +157,6 @@ import java.io.BufferedReader;
             current_height++;
         }
         n_entries++;
-        //System.out.println("entry "+key+ " "+ value+ ", inserita");
         return traversed_nodes;
   
     }
@@ -272,7 +270,6 @@ import java.io.BufferedReader;
             }
             //aggiunta mia
             double average_nodes = ((double)total_traversed_nodes/n_inserts);
-            //System.out.println("totale nodi attraversati: "+ total_traversed_nodes);
             System.out.println(alpha + " " + skipList.size() + " " + n_inserts + " " + average_nodes);
             //fine aggiunta mia
         } catch (IOException e) {
@@ -280,35 +277,3 @@ import java.io.BufferedReader;
         }
     }
  }
- /*
- int current_height = height;
-        Node temp_node = s;
-        Node to_be_inserted = new Node(new MyEntry(key,value));
-        //temp_node parte da s (in alto a sx)
-        while(temp_node.below != null){
-            current_height--;
-            temp_node = temp_node.below;
-            traversed_nodes++; // conto il nodo da cui scendo
-            while(key >= temp_node.next.getKey()){//probabilmente quando hai fatto un collegamento orizz hai scazzato, controlla
-                temp_node = temp_node.next;
-                traversed_nodes++; // conto il nodo  da cui mi sposto a dx
-            }
-            //inserimento
-            if(current_height<= level){
-                if(current_height < level){
-                    //creo un collegamnto verticali se ho già inserito ad un livello più alto 
-                    Node new_node = new Node(new MyEntry(key,value));
-                    to_be_inserted.below = new_node;
-                    new_node.above = to_be_inserted;
-                    to_be_inserted = new_node;
-                }
-                //inserisco il nodo al livello in cui mi trovo (collegamenti orizzontali)
-                Node next = temp_node.next;
-                temp_node.next = to_be_inserted;
-                to_be_inserted.prev = temp_node;
-                next.prev = to_be_inserted;   
-                to_be_inserted.next = next;
-            }
-        }
-        traversed_nodes++; //per contare il nodo in cui si ferma
- */ 
