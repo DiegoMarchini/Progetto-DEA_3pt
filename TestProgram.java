@@ -268,7 +268,7 @@ import java.io.BufferedReader;
             System.out.println(N + " " + alpha);
             SkipListPQ skipList = new SkipListPQ(alpha);
             //aggiunta mia 
-            int total_traversed_nodes = 0;
+            long total_traversed_nodes = 0;
             int n_inserts = 0;
             //fine aggiunta mia
             for (int i = 0; i < N; i++) {
@@ -301,7 +301,7 @@ import java.io.BufferedReader;
                 }
             }
             
-            double average_nodes = ((double)total_traversed_nodes/n_inserts);
+            double average_nodes =((double)total_traversed_nodes/n_inserts);
             System.out.println(alpha + " " + skipList.size() + " " + n_inserts + " " + average_nodes);
             
         } catch (IOException e) {
