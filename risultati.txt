@@ -1,0 +1,6 @@
+alphaEfficiencyTest_10K_1  : 0.0 9800 10000 2394.4036
+alphaEfficiencyTest_10K_2  : 0.25 9800 10000 23.0543
+alphaEfficiencyTest_10K_3  : 0.5 9800 10000 24.5061
+alphaEfficiencyTest_100K_1 : 0.0 98000 100000 24076.94689
+alphaEfficiencyTest_100K_2 : 0.25 98000 100000 28.14755
+alphaEfficiencyTest_100K_3 : 0.5 98000 100000 30.36456
